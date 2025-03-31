@@ -68,13 +68,20 @@ function Sequencer({
         newSequence = generateSineWavePattern(rows, cols);
         break;
       case 'auto':
-        // Implement a more complex auto-generating pattern
         newSequence = range(cols).map(i => 
           Math.floor(Math.sin(i * 0.5) * (rows - 1) + Math.random() * 2)
         );
         break;
       default:
-        newSequence = sequence.values || range(cols).map(() => 0);
+        // For manual mode, preserve existing values and pad/trim as needed
+        newSequence = [...(sequence.values || [])];
+        if (newSequence.length < cols) {
+          // Pad with zeros if we need more columns
+          newSequence = [...newSequence, ...Array(cols - newSequence.length).fill(0)];
+        } else if (newSequence.length > cols) {
+          // Trim if we need fewer columns
+          newSequence = newSequence.slice(0, cols);
+        }
     }
     
     setSequence({
