@@ -7,23 +7,47 @@ import "@spectrum-web-components/theme/scale-medium.js";
 import "@spectrum-web-components/slider/sp-slider.js";
 import "./index.css";
 
-// Utility functions
+/**
+ * Utility function to create an array with values from 0 to n-1
+ * @param {number} n - The length of the array
+ * @returns {number[]} - An array with values from 0 to n-1
+ */
+// Utility function to create an array with values from 0 to n-1
 function range(n) {
   return Array.from({ length: n }).map((_, i) => i);
 }
 
+/**
+ * Generates a random pattern in the form of an array with random values
+ * @param {number} rows - The number of rows in the pattern
+ * @param {number} cols - The number of columns in the pattern
+ * @returns {number[]} - An array with random values
+ */
+// Generates a random pattern in the form of an array with random values
 function generateRandomPattern(rows, cols) {
   return Array.from({ length: cols }).map(() => 
     Math.floor(Math.random() * rows)
   );
 }
 
+/**
+ * Generates a sine wave pattern as an array based on input dimensions
+ * @param {number} rows - The number of rows in the pattern
+ * @param {number} cols - The number of columns in the pattern
+ * @returns {number[]} - An array with sine wave pattern
+ */
+// Generates a sine wave pattern as an array based on input dimensions
 function generateSineWavePattern(rows, cols) {
   return Array.from({ length: cols }).map((_, i) => 
     Math.floor((Math.sin(i / cols * Math.PI * 2) + 1) / 2 * (rows - 1))
   );
 }
 
+/**
+ * Cell component that represents an individual grid cell in the sequencer
+ * @param {{select: (e: React.MouseEvent<HTMLDivElement>) => void, selected: boolean}} props - The props object
+ */
+// Cell component that represents an individual grid cell in the sequencer
 function Cell({ select, selected }) {
   return (
     <div
@@ -34,6 +58,11 @@ function Cell({ select, selected }) {
   );
 }
 
+/**
+ * Column component that represents a column of cells
+ * @param {{playing: boolean, val: number, setVal: (v: number) => void, rows: number}} props - The props object
+ */
+// Column component that represents a column of cells
 function Column({ playing, val, setVal, rows }) {
   return (
     <div className={cx("column", { playing })}>
@@ -44,6 +73,11 @@ function Column({ playing, val, setVal, rows }) {
   );
 }
 
+/**
+ * Sequencer component managing the grid and functionality of sequence creation
+ * @param {{sequence: {values: number[], duration: number}, setSequence: (s: {values: number[], duration: number}) => void, device: ButtplugDevice, paused: boolean, onToggle: (play: boolean) => void, onRemove: () => void}} props - The props object
+ */
+// Sequencer component managing the grid and functionality of sequence creation
 function Sequencer({
   sequence,
   setSequence,
