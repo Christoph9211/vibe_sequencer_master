@@ -7,22 +7,11 @@ import "@spectrum-web-components/theme/scale-medium.js";
 import "@spectrum-web-components/slider/sp-slider.js";
 import "./index.css";
 
-/**
- * Utility function to create an array with values from 0 to n-1
- * @param {number} n - The length of the array
- * @returns {number[]} - An array with values from 0 to n-1
- */
 // Utility function to create an array with values from 0 to n-1
 function range(n) {
   return Array.from({ length: n }).map((_, i) => i);
 }
 
-/**
- * Generates a random pattern in the form of an array with random values
- * @param {number} rows - The number of rows in the pattern
- * @param {number} cols - The number of columns in the pattern
- * @returns {number[]} - An array with random values
- */
 // Generates a random pattern in the form of an array with random values
 function generateRandomPattern(rows, cols) {
   return Array.from({ length: cols }).map(() => 
@@ -30,12 +19,6 @@ function generateRandomPattern(rows, cols) {
   );
 }
 
-/**
- * Generates a sine wave pattern as an array based on input dimensions
- * @param {number} rows - The number of rows in the pattern
- * @param {number} cols - The number of columns in the pattern
- * @returns {number[]} - An array with sine wave pattern
- */
 // Generates a sine wave pattern as an array based on input dimensions
 function generateSineWavePattern(rows, cols) {
   return Array.from({ length: cols }).map((_, i) => 
@@ -43,10 +26,6 @@ function generateSineWavePattern(rows, cols) {
   );
 }
 
-/**
- * Cell component that represents an individual grid cell in the sequencer
- * @param {{select: (e: React.MouseEvent<HTMLDivElement>) => void, selected: boolean}} props - The props object
- */
 // Cell component that represents an individual grid cell in the sequencer
 function Cell({ select, selected }) {
   return (
@@ -58,10 +37,6 @@ function Cell({ select, selected }) {
   );
 }
 
-/**
- * Column component that represents a column of cells
- * @param {{playing: boolean, val: number, setVal: (v: number) => void, rows: number}} props - The props object
- */
 // Column component that represents a column of cells
 function Column({ playing, val, setVal, rows }) {
   return (
@@ -73,10 +48,6 @@ function Column({ playing, val, setVal, rows }) {
   );
 }
 
-/**
- * Sequencer component managing the grid and functionality of sequence creation
- * @param {{sequence: {values: number[], duration: number}, setSequence: (s: {values: number[], duration: number}) => void, device: ButtplugDevice, paused: boolean, onToggle: (play: boolean) => void, onRemove: () => void}} props - The props object
- */
 // Sequencer component managing the grid and functionality of sequence creation
 function Sequencer({
   sequence,
@@ -91,7 +62,7 @@ function Sequencer({
   const [cols, setCols] = useState(8);
   const [patternMode, setPatternMode] = useState('manual');
 
-  // Generate initial sequence based on mode
+  // Effect to generate initial sequence based on selected pattern mode
   useEffect(() => {
     let newSequence;
     switch(patternMode) {
@@ -107,23 +78,22 @@ function Sequencer({
         );
         break;
       default:
-        // For manual mode, preserve existing values and pad/trim as needed
+        // Preserve existing values for manual mode and adjust column count
         newSequence = [...(sequence.values || [])];
         if (newSequence.length < cols) {
-          // Pad with zeros if we need more columns
           newSequence = [...newSequence, ...Array(cols - newSequence.length).fill(0)];
         } else if (newSequence.length > cols) {
-          // Trim if we need fewer columns
           newSequence = newSequence.slice(0, cols);
         }
     }
-    
+    // Update the sequence state
     setSequence({
       ...sequence,
       values: newSequence
     });
   }, [patternMode, rows, cols]);
 
+  // Callback to set a value in the sequence at a specific index
   const setVal = useCallback(
     (v, i) => {
       const newSequence = {...sequence};
@@ -133,6 +103,7 @@ function Sequencer({
     [sequence, setSequence]
   );
 
+  // Callback to set the duration of a sequence
   const setDuration = useCallback(
     (duration) => {
       const newSequence = {...sequence};
@@ -142,6 +113,7 @@ function Sequencer({
     [sequence, setSequence]
   );
 
+  // Effect to manage playing state and device commands based on sequence
   useEffect(() => {
     if (paused) return;
 
@@ -228,10 +200,12 @@ function Sequencer({
   );
 }
 
+// Initial sequences fetched from local storage or default
 const initialSequences = localStorage.sequences
   ? JSON.parse(localStorage.sequences)
   : [{values: range(8).map(() => 0), duration: 250}];
 
+// App component representing the main application
 function App() {
   const [connecting, setConnecting] = useState(true);
   const [devices, setDevices] = useState([]);
@@ -239,6 +213,7 @@ function App() {
   const [sequences, setSequences] = useState(initialSequences);
   const [playing, setPlaying] = useState();
 
+  // Callback to set the device index from a list of devices
   const setDeviceIndex = useCallback((index, devices) => {
     index = Number(index);
     if (isNaN(index)) return;
@@ -252,6 +227,7 @@ function App() {
     }
   });
 
+  // Effect to initialize connection to device client
   useEffect(async () => {
     await Buttplug.buttplugInit();
 
@@ -271,19 +247,23 @@ function App() {
     setConnecting(false);
   }, []);
 
+/*************  ✨ Codeium Command 🌟  *************/
   return (
     <sp-theme>
       <h1>vibe sequencer</h1>
 
+      {/* Display the device select list, which lets the user select which device to connect to */}
       <label className="device">
         device:{" "}
         <select
           value={connecting ? "" : localStorage.deviceIndex || ""}
           onChange={(e) => setDeviceIndex(e.target.value, devices)}
         >
+          {/* Display a message while the client is connecting to the intiface */}
           <option disabled value="">
             {connecting ? "connecting to intiface..." : "select a device"}
           </option>
+          {/* List all the devices that are connected */}
           {devices.map((device, i) => (
             <option key={i} value={device.Index}>
               {device.Name}
@@ -292,9 +272,19 @@ function App() {
         </select>
       </label>
 
+      {/* Render all the sequences in the list */}
       {sequences.map((sequence, i) => {
         return (
           <Sequencer
+            key={i}
+            sequence={sequence}
+            setSequence={(sequence) => {
+              const newSequences = sequences.slice(0);
+              newSequences[i] = sequence;
+              localStorage.sequences = JSON.stringify(newSequences);
+              setSequences(newSequences);
+            }}
+            device={device}
             paused={playing !== i}
             onToggle={(play) => {
               if (play) setPlaying(i);
@@ -313,19 +303,11 @@ function App() {
               localStorage.sequences = JSON.stringify(newSequences);
               setSequences(newSequences);
             }}
-            key={i}
-            sequence={sequence}
-            setSequence={(sequence) => {
-              const newSequences = sequences.slice(0);
-              newSequences[i] = sequence;
-              localStorage.sequences = JSON.stringify(newSequences);
-              setSequences(newSequences);
-            }}
-            device={device}
           />
         );
       })}
 
+      {/* Add a button to add a new sequencer */}
       <button
         onClick={() => {
           const newSequences = sequences.slice(0);
@@ -340,4 +322,8 @@ function App() {
   );
 }
 
+// Render the App component into the root div
 ReactDOM.render(<App />, document.getElementById("root"));
+/******  cdade36f-e074-4008-891d-d18c42a8bc08  *******/
+
+
