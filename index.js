@@ -26,6 +26,47 @@ function generateSineWavePattern(rows, cols) {
   );
 }
 
+// Generates a Markov Chain pattern based on transition probabilities
+function generateMarkovPattern(rows, cols) {
+  // Create a transition matrix where each row represents the current state
+  // and each column represents the probability of transitioning to that state
+  const transitionMatrix = Array.from({ length: rows }, () => 
+    Array.from({ length: rows }, () => Math.random())
+  );
+  
+  // Normalize the transition matrix so each row sums to 1
+  for (let i = 0; i < rows; i++) {
+    const rowSum = transitionMatrix[i].reduce((sum, val) => sum + val, 0);
+    for (let j = 0; j < rows; j++) {
+      transitionMatrix[i][j] /= rowSum;
+    }
+  }
+
+  // Generate the pattern
+  const pattern = [];
+  let currentState = Math.floor(Math.random() * rows);
+  pattern.push(currentState);
+
+  for (let i = 1; i < cols; i++) {
+    // Generate a random number between 0 and 1
+    const rand = Math.random();
+    let cumulativeProb = 0;
+    
+    // Find the next state based on transition probabilities
+    for (let nextState = 0; nextState < rows; nextState++) {
+      cumulativeProb += transitionMatrix[currentState][nextState];
+      if (rand <= cumulativeProb) {
+        currentState = nextState;
+        break;
+      }
+    }
+    
+    pattern.push(currentState);
+  }
+
+  return pattern;
+}
+
 // Cell component that represents an individual grid cell in the sequencer
 function Cell({ select, selected }) {
   return (
@@ -71,6 +112,9 @@ function Sequencer({
         break;
       case 'sine':
         newSequence = generateSineWavePattern(rows, cols);
+        break;
+      case 'markov':
+        newSequence = generateMarkovPattern(rows, cols);
         break;
       case 'auto':
         newSequence = range(cols).map(i => 
@@ -144,6 +188,7 @@ function Sequencer({
           <option value="manual">Manual</option>
           <option value="random">Random</option>
           <option value="sine">Sine Wave</option>
+          <option value="markov">Markov Chain</option>
           <option value="auto">Auto</option>
         </select>
         <div className="grid-controls">
@@ -162,7 +207,7 @@ function Sequencer({
             <input 
               type="number" 
               min="4" 
-              max="16" 
+              max="32" 
               value={cols} 
               onChange={(e) => setCols(Number(e.target.value))}
             />
@@ -247,7 +292,7 @@ function App() {
     setConnecting(false);
   }, []);
 
-/*************  ✨ Codeium Command 🌟  *************/
+
   return (
     <sp-theme>
       <h1>vibe sequencer</h1>
@@ -324,6 +369,5 @@ function App() {
 
 // Render the App component into the root div
 ReactDOM.render(<App />, document.getElementById("root"));
-/******  cdade36f-e074-4008-891d-d18c42a8bc08  *******/
 
 
