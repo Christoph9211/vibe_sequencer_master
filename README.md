@@ -1,6 +1,6 @@
 # vibe sequencer
 
-https://webvrnsfw.github.io/vibe-sequencer/
+<https://webvrnsfw.github.io/vibe-sequencer/>
 
 A [Buttplug](https://buttplug.io/) client application that lets you control your vibrating sex toys with sequencers.
 
