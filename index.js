@@ -25,7 +25,203 @@ function generateSineWavePattern(rows, cols) {
     Math.floor((Math.sin(i / cols * Math.PI * 2) + 1) / 2 * (rows - 1))
   );
 }
+function generatePerlinPattern(rows, cols) {
+  function noise(x) {
+    return Math.random() * 2 - 1;
+  }
+  function smoothNoise(x) {
+    return (noise(x - 1) + noise(x) + noise(x + 1)) / 3;
+  }
+  function interpolate(a, b, t) {
+    return a + (b - a) * (t * t * (3 - 2 * t)); // Smoother interpolation
+  }
+  function perlin(x) {
+    let total = 0;
+    let frequency = 0.5; // Lower frequency for slower changes
+    let amplitude = 1;
+    let maxValue = 0;
+    for (let o = 0; o < 4; o++) {
+      const xi = Math.floor(x * frequency);
+      const xf = (x * frequency) % 1;
+      total += interpolate(smoothNoise(xi), smoothNoise(xi + 1), xf) * amplitude;
+      maxValue += amplitude;
+      amplitude *= 0.5;
+      frequency *= 2;
+    }
+    return total / maxValue;
+  }
+  return Array.from({ length: cols }, (_, i) => {
+    const noiseValue = perlin(i / cols * 10);
+    const normalizedValue = (noiseValue + 1) / 2;
+    return Math.floor(normalizedValue * (rows - 1));
+  });
+}
 
+function generateBrownianPattern(rows, cols) {
+  const pattern = [Math.floor(Math.random() * rows)];
+  for (let i = 1; i < cols; i++) {
+    const prev = pattern[i - 1];
+    // Small random step, biased to avoid staying static too long
+    const step = Math.random() < 0.7 ? (Math.random() < 0.5 ? -1 : 1) : (Math.random() < 0.5 ? -2 : 2);
+    let next = prev + step;
+    next = Math.max(0, Math.min(rows - 1, next));
+    pattern.push(next);
+  }
+  return pattern;
+}
+function generateMarkovPattern(rows, cols, seed = Math.random()) {
+  // Create transition matrix
+  const matrix = Array(rows).fill().map(() => Array(rows).fill(0));
+  
+  // Initialize with some randomness
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < rows; j++) {
+      matrix[i][j] = Math.random();
+    }
+    // Normalize row
+    const sum = matrix[i].reduce((a, b) => a + b, 0);
+    matrix[i] = matrix[i].map(v => v / sum);
+  }
+
+  // Generate pattern using Markov chain
+  const pattern = [];
+  let current = Math.floor(seed * rows);
+  
+  for (let i = 0; i < cols; i++) {
+    pattern.push(current);
+    const r = Math.random();
+    let sum = 0;
+    for (let j = 0; j < rows; j++) {
+      sum += matrix[current][j];
+      if (r <= sum) {
+        current = j;
+        break;
+      }
+    }
+  }
+  
+  return pattern;
+}
+
+// Cellular Automaton based pattern generator
+function generateCellularPattern(rows, cols, seed = Math.random()) {
+  const pattern = Array(cols).fill(0);
+  const rule = Math.floor(seed * 256); // Wolfram rule number
+  
+  // Initialize first cell
+  pattern[0] = Math.floor(Math.random() * rows);
+  
+  // Apply cellular automaton rules
+  for (let i = 1; i < cols; i++) {
+    const prev = pattern[i - 1];
+    const next = (prev + Math.floor(Math.random() * 3) - 1) % rows;
+    pattern[i] = Math.max(0, Math.min(rows - 1, next));
+  }
+  
+  return pattern;
+}
+
+// Neural Network based pattern generator
+function generateNeuralPattern(rows, cols, seed = Math.random()) {
+  // Simple feed-forward neural network
+  const input = Array(4).fill().map(() => Math.random());
+  const hidden = Array(8).fill().map(() => Math.random());
+  const output = Array(rows).fill().map(() => Math.random());
+  
+  // Generate pattern using neural network
+  const pattern = [];
+  for (let i = 0; i < cols; i++) {
+    // Forward pass
+    const hiddenActivation = hidden.map((w, j) => 
+      Math.tanh(input[j % 4] * w + seed)
+    );
+    
+    const outputActivation = output.map((w, j) => 
+      hiddenActivation.reduce((sum, h, k) => sum + h * w, 0)
+    );
+    
+    // Convert to row index
+    const maxIndex = outputActivation.indexOf(Math.max(...outputActivation));
+    pattern.push(maxIndex);
+    
+    // Shift input window
+    input.shift();
+    input.push(Math.random());
+  }
+  
+  return pattern;
+}
+
+// Genetic Algorithm based pattern generator
+function generateGeneticPattern(rows, cols, seed = Math.random()) {
+  // Population of patterns
+  const population = Array(10).fill().map(() => 
+    Array(cols).fill().map(() => Math.floor(Math.random() * rows))
+  );
+  
+  // Fitness function
+  const fitness = (pattern) => {
+    let score = 0;
+    for (let i = 1; i < pattern.length; i++) {
+      // Reward smooth transitions
+      score += 1 - Math.abs(pattern[i] - pattern[i-1]) / rows;
+    }
+    return score;
+  };
+  
+  // Evolution steps
+  for (let generation = 0; generation < 5; generation++) {
+    // Sort by fitness
+    population.sort((a, b) => fitness(b) - fitness(a));
+    
+    // Crossover and mutation
+    for (let i = 5; i < 10; i++) {
+      const parent1 = population[Math.floor(Math.random() * 5)];
+      const parent2 = population[Math.floor(Math.random() * 5)];
+      
+      // Crossover
+      const crossover = Array(cols).fill().map((_, j) => 
+        Math.random() < 0.5 ? parent1[j] : parent2[j]
+      );
+      
+      // Mutation
+      const mutation = crossover.map(v => 
+        Math.random() < 0.1 ? Math.floor(Math.random() * rows) : v
+      );
+      
+      population[i] = mutation;
+    }
+  }
+  
+  return population[0]; // Return best pattern
+}
+
+// L-System based pattern generator
+function generateLSystemPattern(rows, cols, seed = Math.random()) {
+  const pattern = [];
+  let current = Math.floor(seed * rows);
+  
+  // L-System rules
+  const rules = {
+    '0': '01',
+    '1': '10'
+  };
+  
+  // Generate L-System string
+  let axiom = '0';
+  for (let i = 0; i < 3; i++) {
+    axiom = axiom.split('').map(c => rules[c] || c).join('');
+  }
+  
+  // Convert to pattern
+  for (let i = 0; i < cols; i++) {
+    const symbol = axiom[i % axiom.length];
+    current = (current + (symbol === '1' ? 1 : -1)) % rows;
+    pattern.push(Math.max(0, Math.min(rows - 1, current)));
+  }
+  
+  return pattern;
+} 
 // Generates a Markov Chain pattern based on transition probabilities
 function generateMarkovPattern(rows, cols) {
   // Create a transition matrix where each row represents the current state
@@ -111,10 +307,37 @@ function Sequencer({
         newSequence = generateRandomPattern(rows, cols);
         break;
       case 'sine':
-        newSequence = generateSineWavePattern(rows, cols);
+        newSequence = generateSineWavePattern(rows, cols, 'sine');
+        break;
+      case 'square':
+        newSequence = generateSineWavePattern(rows, cols, 'square');
+        break;
+      case 'triangle':
+        newSequence = generateSineWavePattern(rows, cols, 'triangle');
+        break;
+      case 'sawtooth':
+        newSequence = generateSineWavePattern(rows, cols, 'sawtooth');
+        break;
+      case 'cellular':
+        newSequence = generateCellularPattern(rows, cols);
+        break;
+      case 'neural':
+        newSequence = generateNeuralPattern(rows, cols);
+        break;
+      case 'l-system':
+        newSequence = generateLSystemPattern(rows, cols);
+        break;
+      case 'genetic':
+        newSequence = generateGeneticPattern(rows, cols);
         break;
       case 'markov':
         newSequence = generateMarkovPattern(rows, cols);
+        break;
+      case 'perlin':
+        newSequence = generatePerlinPattern(rows, cols);
+        break;
+      case 'brownian':
+        newSequence = generateBrownianPattern(rows, cols);
         break;
       case 'auto':
         newSequence = range(cols).map(i => 
@@ -188,7 +411,16 @@ function Sequencer({
           <option value="manual">Manual</option>
           <option value="random">Random</option>
           <option value="sine">Sine Wave</option>
+          <option value="square">Square Wave</option>
+          <option value="triangle">Triangle Wave</option>
+          <option value="sawtooth">Sawtooth Wave</option>
+          <option value="cellular">Cellular Automaton</option>
+          <option value="neural">Neural Network</option>
+          <option value="l-system">L-System</option>
+          <option value="genetic">Genetic Algorithm</option>
           <option value="markov">Markov Chain</option>
+          <option value="perlin">Perlin Noise</option>
+          <option value="brownian">Brownian Motion</option>
           <option value="auto">Auto</option>
         </select>
         <div className="grid-controls">
@@ -197,7 +429,7 @@ function Sequencer({
             <input 
               type="number" 
               min="3" 
-              max="10" 
+              max="5" 
               value={rows} 
               onChange={(e) => setRows(Number(e.target.value))}
             />
