@@ -293,6 +293,9 @@ function Sequencer({
   paused,
   onToggle,
   onRemove,
+  autoAdvance, // new prop
+  onAdvance,   // new prop
+  isLast,      // new prop
 }) {
   const [playing, setPlaying] = useState(0);
   const [rows, setRows] = useState(5);
@@ -386,20 +389,24 @@ function Sequencer({
 
     const id = setInterval(() => {
       setPlaying((playing) => {
-        playing = (playing + 1) % cols;
+        const nextPlaying = (playing + 1) % cols;
         const allowedMessages = device.AllowedMessages;
         const messageTypes = Buttplug.ButtplugDeviceMessageType;
         if (allowedMessages.includes(messageTypes.LinearCmd)) {
-          device.linear(sequence.values[playing] / 4, Math.floor(sequence.duration * 0.9));
+          device.linear(sequence.values[nextPlaying] / 4, Math.floor(sequence.duration * 0.9));
         } else if (allowedMessages.includes(messageTypes.VibrateCmd)) {
-          device.vibrate(sequence.values[playing] / 4);
+          device.vibrate(sequence.values[nextPlaying] / 4);
         }
-        return playing;
+        // If we've reached the end and autoAdvance is enabled, call onAdvance
+        if (nextPlaying === 0 && autoAdvance && onAdvance && !isLast) {
+          setTimeout(() => onAdvance(), 0);
+        }
+        return nextPlaying;
       });
     }, sequence.duration);
 
     return () => clearInterval(id);
-  }, [device, paused, sequence]);
+  }, [device, paused, sequence, autoAdvance, onAdvance, isLast, cols]);
 
   return (
     <div className="sequencer">
@@ -489,6 +496,7 @@ function App() {
   const [device, setDevice] = useState();
   const [sequences, setSequences] = useState(initialSequences);
   const [playing, setPlaying] = useState();
+  const [autoAdvance, setAutoAdvance] = useState(false);
 
   // Callback to set the device index from a list of devices
   const setDeviceIndex = useCallback((index, devices) => {
@@ -548,6 +556,10 @@ function App() {
           ))}
         </select>
       </label>
+      <label style={{marginLeft: 16}}>
+        <input type="checkbox" checked={autoAdvance} onChange={e => setAutoAdvance(e.target.checked)} />
+        Auto-advance to next pattern
+      </label>
 
       {/* Render all the sequences in the list */}
       {sequences.map((sequence, i) => {
@@ -580,6 +592,16 @@ function App() {
               localStorage.sequences = JSON.stringify(newSequences);
               setSequences(newSequences);
             }}
+            autoAdvance={autoAdvance}
+            onAdvance={() => {
+              if (i + 1 < sequences.length) {
+                setPlaying(i + 1);
+              } else {
+                setPlaying(null);
+                if (device) device.stop();
+              }
+            }}
+            isLast={i === sequences.length - 1}
           />
         );
       })}
