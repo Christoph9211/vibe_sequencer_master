@@ -124,8 +124,8 @@ function generateCellularPattern(rows, cols, seed = Math.random()) {
 // Neural Network based pattern generator
 function generateNeuralPattern(rows, cols, seed = Math.random()) {
   // Simple feed-forward neural network
-  const input = Array(4).fill().map(() => Math.random());
-  const hidden = Array(8).fill().map(() => Math.random());
+  const input = Array(5).fill().map(() => Math.random());
+  const hidden = Array(16).fill().map(() => Math.random());
   const output = Array(rows).fill().map(() => Math.random());
   
   // Generate pattern using neural network
@@ -299,7 +299,7 @@ function Sequencer({
 }) {
   const [playing, setPlaying] = useState(0);
   const [rows, setRows] = useState(5);
-  const [cols, setCols] = useState(8);
+  const [cols, setCols] = useState(16);
   const [patternMode, setPatternMode] = useState('manual');
 
   // Effect to generate initial sequence based on selected pattern mode
@@ -435,7 +435,7 @@ function Sequencer({
             Rows:
             <input 
               type="number" 
-              min="3" 
+              min="5" 
               max="5" 
               value={rows} 
               onChange={(e) => setRows(Number(e.target.value))}
@@ -445,7 +445,7 @@ function Sequencer({
             Columns:
             <input 
               type="number" 
-              min="4" 
+              min="16" 
               max="32" 
               value={cols} 
               onChange={(e) => setCols(Number(e.target.value))}
@@ -487,7 +487,7 @@ function Sequencer({
 // Initial sequences fetched from local storage or default
 const initialSequences = localStorage.sequences
   ? JSON.parse(localStorage.sequences)
-  : [{values: range(8).map(() => 0), duration: 250}];
+  : [{values: range(16).map(() => 0), duration: 250}];
 
 // App component representing the main application
 function App() {
@@ -610,7 +610,7 @@ function App() {
       <button
         onClick={() => {
           const newSequences = sequences.slice(0);
-          newSequences.push({values: range(8).map(() => 0), duration: 250});
+          newSequences.push({values: range(16).map(() => 0), duration: 250});
           localStorage.sequences = JSON.stringify(newSequences);
           setSequences(newSequences);
         }}

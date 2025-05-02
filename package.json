@@ -4,7 +4,7 @@
     "dev": "parcel index.html",
     "start": "parcel serve index.html",
     "build": "parcel build --public-url './' dist/index.html",
-    "serve": "parcel serve dist/index.html --public-url './'"
+    "serve": "parcel serve index.html --public-url './'"
     
   },
   "browserslist": [
