@@ -69,6 +69,70 @@ function generateBrownianPattern(rows, cols) {
   }
   return pattern;
 }
+
+/**
+ * Generates a brownian pattern of numbers.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @returns {number[]} - A 1D array of numbers representing a brownian pattern.
+ */
+function generateLifeLikePattern(rows, cols) {
+  // Start with a random row for the first column
+  const pattern = [Math.floor(Math.random() * rows)];
+
+  // For each column, add a brownian number to the pattern.
+  for (let i = 1; i < cols; i++) {
+    const prev = pattern[i - 1];
+
+    // Determine the next position based on a weighted random choice.
+    // The weights are designed to make the movement pattern more life-like,
+    // with the next position being more likely to be close to the previous position.
+    const next = (() => {
+      const choices = [prev - 2, prev - 1, prev, prev + 1, prev + 2];
+      const weights = [0.1, 0.2, 0.4, 0.2, 0.1];
+      const index = getWeightedRandomIndex(weights);
+      return choices[index];
+    })();
+
+    // Make sure the new position is within the valid range
+    // (between 0 and the number of rows - 1)
+    const nextClamped = Math.max(0, Math.min(rows - 1, next));
+
+    // Add the new position to the pattern
+    pattern.push(nextClamped);
+  }
+
+  // Return the completed pattern
+  return pattern;
+}
+
+/**
+ * Returns a random index into an array, with the probability of
+ * choosing each index determined by the corresponding weight.
+ * @param {number[]} weights - The weights for each index.
+ * @returns {number} - The randomly chosen index.
+ */
+function getWeightedRandomIndex(weights) {
+  // Calculate the total weight
+  const totalWeight = weights.reduce((total, weight) => total + weight, 0);
+
+  // Generate a random number between 0 and the total weight
+  const random = Math.random() * totalWeight;
+
+  // Find the index for which the cumulative weight exceeds the random number
+  let cumulativeWeight = 0;
+  for (let i = 0; i < weights.length; i++) {
+    cumulativeWeight += weights[i];
+    if (random < cumulativeWeight) {
+      return i;
+    }
+  }
+
+  // If we reach this point, it means that the random number was greater than
+  // the total weight, so we return the last index
+  return weights.length - 1;
+}
+
 function generateMarkovPattern(rows, cols, seed = Math.random()) {
   // Create transition matrix
   const matrix = Array(rows).fill().map(() => Array(rows).fill(0));
@@ -342,6 +406,9 @@ function Sequencer({
       case 'brownian':
         newSequence = generateBrownianPattern(rows, cols);
         break;
+      case 'life-like':
+        newSequence = generateLifeLikePattern(rows, cols);
+        break;
       case 'auto':
         newSequence = range(cols).map(i => 
           Math.floor(Math.sin(i * 0.5) * (rows - 1) + Math.random() * 2)
@@ -428,6 +495,7 @@ function Sequencer({
           <option value="markov">Markov Chain</option>
           <option value="perlin">Perlin Noise</option>
           <option value="brownian">Brownian Motion</option>
+          <option value="life-like">Life-like</option>
           <option value="auto">Auto</option>
         </select>
         <div className="grid-controls">
