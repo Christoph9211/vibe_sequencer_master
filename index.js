@@ -96,7 +96,15 @@ function generateLifeLikePattern(rows, cols) {
 
     // Make sure the new position is within the valid range
     // (between 0 and the number of rows - 1)
-    const nextClamped = Math.max(0, Math.min(rows - 1, next));
+    const nextClamped = (() => {
+      const nextUnclamped = Math.max(0, Math.min(rows - 1, next));
+      if (prev === 0 && nextUnclamped === 0) {
+        return 1;
+      } else if (prev === rows - 1 && nextUnclamped === rows - 1) {
+        return rows - 2;
+      }
+      return nextUnclamped;
+    })();
 
     // Add the new position to the pattern
     pattern.push(nextClamped);
