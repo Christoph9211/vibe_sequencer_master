@@ -25,6 +25,12 @@ function generateSineWavePattern(rows, cols) {
     Math.floor((Math.sin(i / cols * Math.PI * 2) + 1) / 2 * (rows - 1))
   );
 }
+/**
+ * Generates a Perlin noise pattern in the form of an array with values from 0 to rows-1.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @returns {number[]} - A 1D array of numbers representing a Perlin noise pattern.
+ */
 function generatePerlinPattern(rows, cols) {
   function noise(x) {
     return Math.random() * 2 - 1;
@@ -57,6 +63,12 @@ function generatePerlinPattern(rows, cols) {
   });
 }
 
+/**
+ * Generates a brownian pattern of numbers.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @returns {number[]} - A 1D array of numbers representing a brownian pattern.
+ */
 function generateBrownianPattern(rows, cols) {
   const pattern = [Math.floor(Math.random() * rows)];
   for (let i = 1; i < cols; i++) {
@@ -141,6 +153,16 @@ function getWeightedRandomIndex(weights) {
   return weights.length - 1;
 }
 
+/**
+ * Generates a pattern of numbers using a Markov chain.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @param {number} [seed=0.5] - The random seed to use.
+ * @returns {number[]} - A 1D array of numbers representing the Markov chain pattern.
+ * The algorithm works by creating a transition matrix and then using it
+ * to generate a pattern of numbers by randomly selecting the next state
+ * based on the probabilities in the matrix.
+ */
 function generateMarkovPattern(rows, cols, seed = Math.random()) {
   // Create transition matrix
   const matrix = Array(rows).fill().map(() => Array(rows).fill(0));
@@ -175,7 +197,16 @@ function generateMarkovPattern(rows, cols, seed = Math.random()) {
   return pattern;
 }
 
-// Cellular Automaton based pattern generator
+
+/**
+ * Generates a pattern of numbers using a simple cellular automaton.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @param {number} [seed=0.5] - The random seed to use.
+ * @returns {number[]} - A 1D array of numbers representing a cellular automaton pattern.
+ * The algorithm works by creating a simple cellular automaton and then applying
+ * its rules to generate a pattern of numbers.
+ */
 function generateCellularPattern(rows, cols, seed = Math.random()) {
   const pattern = Array(cols).fill(0);
   const rule = Math.floor(seed * 256); // Wolfram rule number
@@ -193,7 +224,17 @@ function generateCellularPattern(rows, cols, seed = Math.random()) {
   return pattern;
 }
 
-// Neural Network based pattern generator
+/**
+ * Generates a pattern of numbers using a simple feed-forward neural network.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @param {number} [seed=0.5] - The random seed to use.
+ * @returns {number[]} - A 1D array of numbers representing a neural network pattern.
+ * The algorithm works by creating a simple feed-forward neural network with 5
+ * inputs, 16 hidden neurons, and 'rows' output neurons. The network is then used
+ * to generate a pattern of numbers by performing a forward pass on the network
+ * at each step, and then shifting the input window by one.
+ */
 function generateNeuralPattern(rows, cols, seed = Math.random()) {
   // Simple feed-forward neural network
   const input = Array(5).fill().map(() => Math.random());
@@ -224,7 +265,18 @@ function generateNeuralPattern(rows, cols, seed = Math.random()) {
   return pattern;
 }
 
-// Genetic Algorithm based pattern generator
+
+/**
+ * Generates a pattern of numbers using a genetic algorithm.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @param {number} [seed=0.5] - The random seed to use.
+ * @returns {number[]} - The generated pattern.
+ * The algorithm works by creating a population of patterns, evaluating
+ * each pattern's fitness, and then breeding new patterns by crossover
+ * and mutation. The fitness function rewards patterns with smooth
+ * transitions between adjacent rows.
+ */
 function generateGeneticPattern(rows, cols, seed = Math.random()) {
   // Population of patterns
   const population = Array(10).fill().map(() => 
@@ -268,7 +320,13 @@ function generateGeneticPattern(rows, cols, seed = Math.random()) {
   return population[0]; // Return best pattern
 }
 
-// L-System based pattern generator
+
+/**
+ * Generates a pattern of numbers based on a L-System.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @returns {number[]} - A 1D array of numbers representing an L-System pattern.
+ */
 function generateLSystemPattern(rows, cols, seed = Math.random()) {
   const pattern = [];
   let current = Math.floor(seed * rows);
@@ -294,7 +352,13 @@ function generateLSystemPattern(rows, cols, seed = Math.random()) {
   
   return pattern;
 } 
-// Generates a Markov Chain pattern based on transition probabilities
+
+/**
+ * Generates a pattern of numbers based on a Markov chain transition matrix.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @returns {number[]} - A 1D array of numbers representing a Markov pattern.
+ */
 function generateMarkovPattern(rows, cols) {
   // Create a transition matrix where each row represents the current state
   // and each column represents the probability of transitioning to that state
@@ -369,66 +433,66 @@ function Sequencer({
   onAdvance,   // new prop
   isLast,      // new prop
 }) {
-  const [playing, setPlaying] = useState(0);
+  const [playingIndex, setPlayingIndex] = useState(0);
   const [rows, setRows] = useState(5);
-  const [cols, setCols] = useState(16);
+  const [columns, setColumns] = useState(16);
   const [patternMode, setPatternMode] = useState('manual');
 
   // Effect to generate initial sequence based on selected pattern mode
   useEffect(() => {
     let newSequence;
-    switch(patternMode) {
+    switch (patternMode) {
       case 'random':
-        newSequence = generateRandomPattern(rows, cols);
+        newSequence = generateRandomPattern(rows, columns);
         break;
       case 'sine':
-        newSequence = generateSineWavePattern(rows, cols, 'sine');
+        newSequence = generateSineWavePattern(rows, columns, 'sine');
         break;
       case 'square':
-        newSequence = generateSineWavePattern(rows, cols, 'square');
+        newSequence = generateSineWavePattern(rows, columns, 'square');
         break;
       case 'triangle':
-        newSequence = generateSineWavePattern(rows, cols, 'triangle');
+        newSequence = generateSineWavePattern(rows, columns, 'triangle');
         break;
       case 'sawtooth':
-        newSequence = generateSineWavePattern(rows, cols, 'sawtooth');
+        newSequence = generateSineWavePattern(rows, columns, 'sawtooth');
         break;
       case 'cellular':
-        newSequence = generateCellularPattern(rows, cols);
+        newSequence = generateCellularPattern(rows, columns);
         break;
       case 'neural':
-        newSequence = generateNeuralPattern(rows, cols);
+        newSequence = generateNeuralPattern(rows, columns);
         break;
       case 'l-system':
-        newSequence = generateLSystemPattern(rows, cols);
+        newSequence = generateLSystemPattern(rows, columns);
         break;
       case 'genetic':
-        newSequence = generateGeneticPattern(rows, cols);
+        newSequence = generateGeneticPattern(rows, columns);
         break;
       case 'markov':
-        newSequence = generateMarkovPattern(rows, cols);
+        newSequence = generateMarkovPattern(rows, columns);
         break;
       case 'perlin':
-        newSequence = generatePerlinPattern(rows, cols);
+        newSequence = generatePerlinPattern(rows, columns);
         break;
       case 'brownian':
-        newSequence = generateBrownianPattern(rows, cols);
+        newSequence = generateBrownianPattern(rows, columns);
         break;
       case 'life-like':
-        newSequence = generateLifeLikePattern(rows, cols);
+        newSequence = generateLifeLikePattern(rows, columns);
         break;
       case 'auto':
-        newSequence = range(cols).map(i => 
+        newSequence = range(columns).map(i =>
           Math.floor(Math.sin(i * 0.5) * (rows - 1) + Math.random() * 2)
         );
         break;
       default:
         // Preserve existing values for manual mode and adjust column count
         newSequence = [...(sequence.values || [])];
-        if (newSequence.length < cols) {
-          newSequence = [...newSequence, ...Array(cols - newSequence.length).fill(0)];
-        } else if (newSequence.length > cols) {
-          newSequence = newSequence.slice(0, cols);
+        if (newSequence.length < columns) {
+          newSequence = [...newSequence, ...Array(columns - newSequence.length).fill(0)];
+        } else if (newSequence.length > columns) {
+          newSequence = newSequence.slice(0, columns);
         }
     }
     // Update the sequence state
@@ -436,7 +500,7 @@ function Sequencer({
       ...sequence,
       values: newSequence
     });
-  }, [patternMode, rows, cols]);
+  }, [patternMode, rows, columns]);
 
   // Callback to set a value in the sequence at a specific index
   const setVal = useCallback(
@@ -460,28 +524,28 @@ function Sequencer({
 
   // Effect to manage playing state and device commands based on sequence
   useEffect(() => {
-    if (paused) return;
-
-    const id = setInterval(() => {
-      setPlaying((playing) => {
-        const nextPlaying = (playing + 1) % cols;
+      if (!device || paused || !sequence || !sequence.values) return;
+      
+      const id = setInterval(() => {
+      setPlayingIndex((playingIndex) => {
+        const nextPlayingIndex = (playingIndex + 1) % columns;
         const allowedMessages = device.AllowedMessages;
         const messageTypes = Buttplug.ButtplugDeviceMessageType;
         if (allowedMessages.includes(messageTypes.LinearCmd)) {
-          device.linear(sequence.values[nextPlaying] / 4, Math.floor(sequence.duration * 0.9));
+          device.linear(sequence.values[nextPlayingIndex] / 4, Math.floor(sequence.duration * 0.9));
         } else if (allowedMessages.includes(messageTypes.VibrateCmd)) {
-          device.vibrate(sequence.values[nextPlaying] / 4);
+          device.vibrate(sequence.values[nextPlayingIndex] / 4);
         }
         // If we've reached the end and autoAdvance is enabled, call onAdvance
-        if (nextPlaying === 0 && autoAdvance && onAdvance && !isLast) {
+        if (nextPlayingIndex === 0 && autoAdvance && onAdvance && !isLast) {
           setTimeout(() => onAdvance(), 0);
         }
-        return nextPlaying;
+        return nextPlayingIndex;
       });
     }, sequence.duration);
 
-    return () => clearInterval(id);
-  }, [device, paused, sequence, autoAdvance, onAdvance, isLast, cols]);
+      return () => clearInterval(id);
+}, [device, paused, sequence, autoAdvance, onAdvance, isLast, columns]);
 
   return (
     <div className="sequencer">
@@ -523,15 +587,15 @@ function Sequencer({
               type="number" 
               min="16" 
               max="32" 
-              value={cols} 
-              onChange={(e) => setCols(Number(e.target.value))}
+              value={columns} 
+              onChange={(e) => setColumns(Number(e.target.value))}
             />
           </label>
         </div>
         <button onClick={() => onToggle(paused)} disabled={!device}>
           {paused ? "play" : "pause"}
         </button>
-        <sp-slider
+        <sp-slider style={{width: '100%', padding: '10px 0'}}
           label="duration"
           value={sequence.duration}
           min={250}
@@ -543,18 +607,18 @@ function Sequencer({
         <button onClick={onRemove}>remove</button>
       </div>
       <div className="grid" style={{
-        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gridTemplateRows: `repeat(${rows}, 1fr)`
       }}>
-        {sequence.values.map((val, i) => (
+        {sequence && sequence.values ? sequence.values.map((val, i) => (
           <Column 
             key={i} 
-            playing={playing === i} 
+            playing={playingIndex === i} 
             val={val} 
             rows={rows}
             setVal={(v) => setVal(v, i)} 
           />
-        ))}
+        )) : null}
       </div>
     </div>
   );
