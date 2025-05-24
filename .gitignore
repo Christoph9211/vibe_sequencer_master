@@ -6,3 +6,4 @@ dist/
 # Ignore files
 .vscode/launch.json
 vibe-sequencer-master.zip
+.vscode/
