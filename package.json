@@ -3,9 +3,7 @@
   "scripts": {
     "dev": "parcel index.html",
     "start": "parcel serve index.html",
-    "build": "parcel build --public-url './' dist/index.html",
-    "serve": "parcel serve index.html --public-url './'"
-    
+    "build": "parcel build dist/index.html"
   },
   "browserslist": [
     "last 3 Chrome versions",

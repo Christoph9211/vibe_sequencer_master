@@ -1,3 +1,5 @@
 .cache/
 node_modules/
 dist/
+.vscode/
+vibe-sequencer-master\vibe-sequencer-master.zip
