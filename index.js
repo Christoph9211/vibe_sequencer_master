@@ -513,6 +513,8 @@ function Sequencer({
   const [rows, setRows] = useState(5);
   const [columns, setColumns] = useState(16);
   const [patternMode, setPatternMode] = useState('manual');
+  const columnMin = 8; // Configurable minimum value for columns
+  const columnMax = 64; // Configurable maximum value for columns
 
   // Effect to generate initial sequence based on selected pattern mode
   useEffect(() => {
@@ -522,16 +524,16 @@ function Sequencer({
         newSequence = generateRandomPattern(rows, columns);
         break;
       case 'sine':
-        newSequence = generateSineWavePattern(rows, columns, 'sine');
+        newSequence = generateSineWavePattern(rows, columns);
         break;
       case 'square':
-        newSequence = generateSineWavePattern(rows, columns, 'square');
+        newSequence = generateSineWavePattern(rows, columns);
         break;
       case 'triangle':
-        newSequence = generateSineWavePattern(rows, columns, 'triangle');
+        newSequence = generateSineWavePattern(rows, columns);
         break;
       case 'sawtooth':
-        newSequence = generateSineWavePattern(rows, columns, 'sawtooth');
+        newSequence = generateSineWavePattern(rows, columns);
         break;
       case 'cellular':
         newSequence = generateCellularPattern(rows, columns);
@@ -665,8 +667,8 @@ function Sequencer({
             Columns:
             <input 
               type="number" 
-              min="16" 
-              max="32" 
+              min={columnMin} 
+              max={columnMax} 
               value={columns} 
               onChange={(e) => setColumns(Number(e.target.value))}
             />
@@ -675,14 +677,16 @@ function Sequencer({
         <button onClick={() => onToggle(paused)} disabled={!device}>
           {paused ? "play" : "pause"}
         </button>
-        <sp-slider style={{width: '100%', padding: '10px 0'}}
-          label="duration"
+        <sp-slider
+          size="x1"
+          style={{ width: '100%', padding: '20px 0' }}
+          label="Duration"
           value={sequence.duration}
           min={250}
           max={3000}
           step={250}
           onInput={(e) => setDuration(parseInt(e.target.value, 10))}
-        ></sp-slider>
+        />
         <div className="spacer"></div>
         <button onClick={onRemove}>remove</button>
       </div>
@@ -734,7 +738,13 @@ function App() {
 
   // Effect to initialize connection to device client
   useEffect(async () => {
-    await Buttplug.buttplugInit();
+      try {
+          // Initialize the Buttplug library to set up the client for device communication
+          await Buttplug.buttplugInit();
+      } catch (error) {
+          console.error("Failed to initialize Buttplug:", error);
+          return;
+      }
 
     const client = new Buttplug.ButtplugClient("vibe sequencer");
     client.on("deviceadded", () => {
