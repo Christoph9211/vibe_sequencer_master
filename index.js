@@ -399,6 +399,34 @@ function generateMarkovPattern(rows, cols) {
   return pattern;
 }
 
+/**
+ * Generates a pattern of numbers that exhibit organic motion.
+ * @param {number} rows - The number of rows for the pattern.
+ * @param {number} cols - The number of columns for the pattern.
+ * @returns {number[]} - A 1D array of numbers representing an organic motion pattern.
+ * The algorithm works by starting at a random intensity level and then deciding
+ * to increase, decrease, or hold the intensity level at each step, favoring small
+ * changes. The intensity levels are then clamped to the valid range [0, rows-1].
+ */
+function generateOrganicMotion(rows, cols) {
+  let pattern = [];
+  // Start at a random intensity level
+  let current = Math.floor(Math.random() * rows);
+  pattern.push(current);
+  for (let i = 1; i < cols; i++) {
+    // Decide to increase, decrease, or hold (favor small changes)
+    const change = Math.floor(Math.random() * 3) - 1;  // -1, 0, or +1
+    let next = current + change;
+    // Clamp to valid range [0, rows-1]
+    if (next < 0) next = 0;
+    if (next > rows - 1) next = rows - 1;
+    pattern.push(next);
+    current = next;
+  }
+  return pattern;
+}
+
+
 // /**
 //  * Generates lifelike actuator positions using fractal noise and easing.
 //  * @param {number} time - Current time step (e.g., seconds or frames).
@@ -559,9 +587,9 @@ function Sequencer({
       case 'life-like':
         newSequence = generateLifeLikePattern(rows, columns);
         break;
-      // case 'organic-motion':
-      //   newSequence = generateOrganicMotion(time, baseAmplitude, baseFrequency, noiseAmplitude, noiseOctaves, noisePersistence, noiseLacunarity, rows, columns);
-      //   break;
+      case 'organic-motion':
+        newSequence = generateOrganicMotion(rows, columns);
+        break;
       case 'auto':
         newSequence = range(columns).map(i =>
           Math.floor(Math.sin(i * 0.5) * (rows - 1) + Math.random() * 2)
@@ -649,7 +677,7 @@ function Sequencer({
           <option value="perlin">Perlin Noise</option>
           <option value="brownian">Brownian Motion</option>
           <option value="life-like">Life-like</option>
-          {/* <option value="organic-motion">Organic Motion</option> */}
+          <option value="organic-motion">Organic Motion</option>
           <option value="auto">Auto</option>
         </select>
         <div className="grid-controls">
