@@ -11,14 +11,13 @@
     "last 3 Safari versions"
   ],
   "dependencies": {
-    "@spectrum-web-components/slider": "^1.6.0",
-    "@spectrum-web-components/theme": "^1.6.0",
-    "classnames": "^2.5.1",
-    "noisejs": "^2.1.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@spectrum-web-components/slider": "^0.9.3",
+    "@spectrum-web-components/theme": "^0.8.4",
+    "classnames": "^2.3.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.5"
+    "parcel-bundler": "^1.8.1"
   }
 }
