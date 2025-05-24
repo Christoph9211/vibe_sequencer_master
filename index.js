@@ -399,6 +399,82 @@ function generateMarkovPattern(rows, cols) {
   return pattern;
 }
 
+// /**
+//  * Generates lifelike actuator positions using fractal noise and easing.
+//  * @param {number} time - Current time step (e.g., seconds or frames).
+//  * @param {number} baseAmplitude - Base movement amplitude (0 to 1).
+//  * @param {number} baseFrequency - Base oscillation frequency.
+//  * @param {number} noiseAmplitude - Fractal noise amplitude (0 to 1).
+//  * @param {number} noiseOctaves - Number of noise layers (octaves).
+//  * @param {number} noisePersistence - Amplitude multiplier per octave (0 to 1).
+//  * @param {number} noiseLacunarity - Frequency multiplier per octave (>1).
+//  * @param {number} rows - The number of rows for the pattern.
+//  * @param {number} cols - The number of columns for the pattern.
+//  * @returns {number} - A number representing an actuator position.
+//  * @throws Will throw an error if any parameter is invalid.
+//  */
+// function generateOrganicMotion(
+//   time,
+//   baseAmplitude,
+//   baseFrequency,
+//   noiseAmplitude,
+//   noiseOctaves,
+//   noisePersistence,
+//   noiseLacunarity,
+//   rows,
+//   cols
+// ) {
+//   if (time == null || baseAmplitude == null || baseFrequency == null || noiseAmplitude == null || noiseOctaves == null || noisePersistence == null || noiseLacunarity == null || rows == null || cols == null) {
+//     throw new Error('All arguments must be numbers');
+//   }
+//   if (isNaN(time) || isNaN(baseAmplitude) || isNaN(baseFrequency) || isNaN(noiseAmplitude) || isNaN(noiseOctaves) || isNaN(noisePersistence) || isNaN(noiseLacunarity) || isNaN(rows) || isNaN(cols)) {
+//     throw new Error('All arguments must be numbers');
+//   }
+
+//   // 1. Base movement with easing (simulate acceleration/deceleration)
+//   const baseCycle = time * baseFrequency;
+//   const basePhase = Math.sin(baseCycle); // Sine for smooth oscillation
+//   let position = baseAmplitude * basePhase;
+
+//   // 2. Add fractal noise for organic variation
+//   let noise = 0;
+//   let amplitude = noiseAmplitude;
+//   let frequency = 1.0;
+
+//   for (let i = 0; i < noiseOctaves; i++) {
+//     if (isNaN(amplitude) || isNaN(frequency)) {
+//       throw new Error('NaN in noise calculation');
+//     }
+
+//     noise += perlinNoise(baseCycle * frequency) * amplitude;
+//     amplitude *= noisePersistence;
+//     frequency *= noiseLacunarity;
+//   }
+
+//   position += noise; // Add noise to base movement
+
+//   // 3. Clamp to actuator range
+//   const clampedPosition = clamp(position, cols, rows);
+//   return clampedPosition;
+// }
+
+// Helper: Clamp value to [min, max]
+// function clamp(value, min, max) {
+//   if ([value, min, max].some(param => typeof param !== 'number')) {
+//     throw new Error('Clamp parameters must be numbers');
+//   }
+//   return Math.min(Math.max(value, min), max);
+// }
+
+// // Helper: Perlin noise function (replace with a library like noisejs)
+// function perlinNoise(time) {
+//   if (typeof time !== 'number') {
+//     throw new Error('Perlin noise input must be a number');
+//   }
+//   // Placeholder: Replace with actual Perlin/simplex noise
+//   return Math.sin(time * Math.PI * 2) * 0.5 + 0.5;
+// }
+
 // Cell component that represents an individual grid cell in the sequencer
 function Cell({ select, selected }) {
   return (
@@ -481,6 +557,9 @@ function Sequencer({
       case 'life-like':
         newSequence = generateLifeLikePattern(rows, columns);
         break;
+      // case 'organic-motion':
+      //   newSequence = generateOrganicMotion(time, baseAmplitude, baseFrequency, noiseAmplitude, noiseOctaves, noisePersistence, noiseLacunarity, rows, columns);
+      //   break;
       case 'auto':
         newSequence = range(columns).map(i =>
           Math.floor(Math.sin(i * 0.5) * (rows - 1) + Math.random() * 2)
@@ -568,6 +647,7 @@ function Sequencer({
           <option value="perlin">Perlin Noise</option>
           <option value="brownian">Brownian Motion</option>
           <option value="life-like">Life-like</option>
+          {/* <option value="organic-motion">Organic Motion</option> */}
           <option value="auto">Auto</option>
         </select>
         <div className="grid-controls">
