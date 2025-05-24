@@ -1,5 +1,8 @@
+# Ignore directories
 .cache/
 node_modules/
 dist/
-.vscode/
-vibe-sequencer-master\vibe-sequencer-master.zip
+
+# Ignore files
+.vscode/launch.json
+vibe-sequencer-master.zip
