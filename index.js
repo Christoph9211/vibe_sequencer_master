@@ -202,14 +202,13 @@ function generateMarkovPattern(rows, cols, seed = Math.random()) {
  * Generates a pattern of numbers using a simple cellular automaton.
  * @param {number} rows - The number of rows for the pattern.
  * @param {number} cols - The number of columns for the pattern.
- * @param {number} [seed=0.5] - The random seed to use.
  * @returns {number[]} - A 1D array of numbers representing a cellular automaton pattern.
  * The algorithm works by creating a simple cellular automaton and then applying
  * its rules to generate a pattern of numbers.
  */
-function generateCellularPattern(rows, cols, seed = Math.random()) {
+function generateCellularPattern(rows, cols) {
   const pattern = Array(cols).fill(0);
-  const rule = Math.floor(seed * 256); // Wolfram rule number
+ 
   
   // Initialize first cell
   pattern[0] = Math.floor(Math.random() * rows);
@@ -270,14 +269,13 @@ function generateNeuralPattern(rows, cols, seed = Math.random()) {
  * Generates a pattern of numbers using a genetic algorithm.
  * @param {number} rows - The number of rows for the pattern.
  * @param {number} cols - The number of columns for the pattern.
- * @param {number} [seed=0.5] - The random seed to use.
  * @returns {number[]} - The generated pattern.
  * The algorithm works by creating a population of patterns, evaluating
  * each pattern's fitness, and then breeding new patterns by crossover
  * and mutation. The fitness function rewards patterns with smooth
  * transitions between adjacent rows.
  */
-function generateGeneticPattern(rows, cols, seed = Math.random()) {
+function generateGeneticPattern(rows, cols) {
   // Population of patterns
   const population = Array(10).fill().map(() => 
     Array(cols).fill().map(() => Math.floor(Math.random() * rows))
@@ -426,83 +424,6 @@ function generateOrganicMotion(rows, cols) {
   return pattern;
 }
 
-
-// /**
-//  * Generates lifelike actuator positions using fractal noise and easing.
-//  * @param {number} time - Current time step (e.g., seconds or frames).
-//  * @param {number} baseAmplitude - Base movement amplitude (0 to 1).
-//  * @param {number} baseFrequency - Base oscillation frequency.
-//  * @param {number} noiseAmplitude - Fractal noise amplitude (0 to 1).
-//  * @param {number} noiseOctaves - Number of noise layers (octaves).
-//  * @param {number} noisePersistence - Amplitude multiplier per octave (0 to 1).
-//  * @param {number} noiseLacunarity - Frequency multiplier per octave (>1).
-//  * @param {number} rows - The number of rows for the pattern.
-//  * @param {number} cols - The number of columns for the pattern.
-//  * @returns {number} - A number representing an actuator position.
-//  * @throws Will throw an error if any parameter is invalid.
-//  */
-// function generateOrganicMotion(
-//   time,
-//   baseAmplitude,
-//   baseFrequency,
-//   noiseAmplitude,
-//   noiseOctaves,
-//   noisePersistence,
-//   noiseLacunarity,
-//   rows,
-//   cols
-// ) {
-//   if (time == null || baseAmplitude == null || baseFrequency == null || noiseAmplitude == null || noiseOctaves == null || noisePersistence == null || noiseLacunarity == null || rows == null || cols == null) {
-//     throw new Error('All arguments must be numbers');
-//   }
-//   if (isNaN(time) || isNaN(baseAmplitude) || isNaN(baseFrequency) || isNaN(noiseAmplitude) || isNaN(noiseOctaves) || isNaN(noisePersistence) || isNaN(noiseLacunarity) || isNaN(rows) || isNaN(cols)) {
-//     throw new Error('All arguments must be numbers');
-//   }
-
-//   // 1. Base movement with easing (simulate acceleration/deceleration)
-//   const baseCycle = time * baseFrequency;
-//   const basePhase = Math.sin(baseCycle); // Sine for smooth oscillation
-//   let position = baseAmplitude * basePhase;
-
-//   // 2. Add fractal noise for organic variation
-//   let noise = 0;
-//   let amplitude = noiseAmplitude;
-//   let frequency = 1.0;
-
-//   for (let i = 0; i < noiseOctaves; i++) {
-//     if (isNaN(amplitude) || isNaN(frequency)) {
-//       throw new Error('NaN in noise calculation');
-//     }
-
-//     noise += perlinNoise(baseCycle * frequency) * amplitude;
-//     amplitude *= noisePersistence;
-//     frequency *= noiseLacunarity;
-//   }
-
-//   position += noise; // Add noise to base movement
-
-//   // 3. Clamp to actuator range
-//   const clampedPosition = clamp(position, cols, rows);
-//   return clampedPosition;
-// }
-
-// Helper: Clamp value to [min, max]
-// function clamp(value, min, max) {
-//   if ([value, min, max].some(param => typeof param !== 'number')) {
-//     throw new Error('Clamp parameters must be numbers');
-//   }
-//   return Math.min(Math.max(value, min), max);
-// }
-
-// // Helper: Perlin noise function (replace with a library like noisejs)
-// function perlinNoise(time) {
-//   if (typeof time !== 'number') {
-//     throw new Error('Perlin noise input must be a number');
-//   }
-//   // Placeholder: Replace with actual Perlin/simplex noise
-//   return Math.sin(time * Math.PI * 2) * 0.5 + 0.5;
-// }
-
 // Cell component that represents an individual grid cell in the sequencer
 function Cell({ select, selected }) {
   return (
@@ -552,15 +473,6 @@ function Sequencer({
         newSequence = generateRandomPattern(rows, columns);
         break;
       case 'sine':
-        newSequence = generateSineWavePattern(rows, columns);
-        break;
-      case 'square':
-        newSequence = generateSineWavePattern(rows, columns);
-        break;
-      case 'triangle':
-        newSequence = generateSineWavePattern(rows, columns);
-        break;
-      case 'sawtooth':
         newSequence = generateSineWavePattern(rows, columns);
         break;
       case 'cellular':
@@ -666,9 +578,6 @@ function Sequencer({
           <option value="manual">Manual</option>
           <option value="random">Random</option>
           <option value="sine">Sine Wave</option>
-          <option value="square">Square Wave</option>
-          <option value="triangle">Triangle Wave</option>
-          <option value="sawtooth">Sawtooth Wave</option>
           <option value="cellular">Cellular Automaton</option>
           <option value="neural">Neural Network</option>
           <option value="l-system">L-System</option>
@@ -710,9 +619,9 @@ function Sequencer({
           style={{ width: '100%', padding: '20px 0' }}
           label="Duration"
           value={sequence.duration}
-          min={250}
-          max={3000}
-          step={250}
+          min={100}
+          max={1000}
+          step={50}
           onInput={(e) => setDuration(parseInt(e.target.value, 10))}
         />
         <div className="spacer"></div>
@@ -739,7 +648,7 @@ function Sequencer({
 // Initial sequences fetched from local storage or default
 const initialSequences = localStorage.sequences
   ? JSON.parse(localStorage.sequences)
-  : [{values: range(16).map(() => 0), duration: 250}];
+  : [{values: range(16).map(() => 0), duration: 200}];
 
 // App component representing the main application
 function App() {
@@ -868,7 +777,7 @@ function App() {
       <button
         onClick={() => {
           const newSequences = sequences.slice(0);
-          newSequences.push({values: range(16).map(() => 0), duration: 250});
+          newSequences.push({values: range(16).map(() => 0), duration: 200});
           localStorage.sequences = JSON.stringify(newSequences);
           setSequences(newSequences);
         }}
