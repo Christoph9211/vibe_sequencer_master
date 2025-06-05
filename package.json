@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "parcel index.html",
     "start": "parcel serve index.html",
-    "build": "parcel build dist/index.html"
+    "build": "parcel build index.html"
   },
   "browserslist": [
     "last 3 Chrome versions",
