@@ -154,51 +154,6 @@ function getWeightedRandomIndex(weights) {
 }
 
 /**
- * Generates a pattern of numbers using a Markov chain.
- * @param {number} rows - The number of rows for the pattern.
- * @param {number} cols - The number of columns for the pattern.
- * @param {number} [seed=0.5] - The random seed to use.
- * @returns {number[]} - A 1D array of numbers representing the Markov chain pattern.
- * The algorithm works by creating a transition matrix and then using it
- * to generate a pattern of numbers by randomly selecting the next state
- * based on the probabilities in the matrix.
- */
-function generateMarkovPattern(rows, cols, seed = Math.random()) {
-  // Create transition matrix
-  const matrix = Array(rows).fill().map(() => Array(rows).fill(0));
-  
-  // Initialize with some randomness
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < rows; j++) {
-      matrix[i][j] = Math.random();
-    }
-    // Normalize row
-    const sum = matrix[i].reduce((a, b) => a + b, 0);
-    matrix[i] = matrix[i].map(v => v / sum);
-  }
-
-  // Generate pattern using Markov chain
-  const pattern = [];
-  let current = Math.floor(seed * rows);
-  
-  for (let i = 0; i < cols; i++) {
-    pattern.push(current);
-    const r = Math.random();
-    let sum = 0;
-    for (let j = 0; j < rows; j++) {
-      sum += matrix[current][j];
-      if (r <= sum) {
-        current = j;
-        break;
-      }
-    }
-  }
-  
-  return pattern;
-}
-
-
-/**
  * Generates a pattern of numbers using a simple cellular automaton.
  * @param {number} rows - The number of rows for the pattern.
  * @param {number} cols - The number of columns for the pattern.
@@ -674,29 +629,33 @@ function App() {
   });
 
   // Effect to initialize connection to device client
-  useEffect(async () => {
+  useEffect(() => {
+    async function init() {
       try {
-          // Initialize the Buttplug library to set up the client for device communication
-          await Buttplug.buttplugInit();
+        // Initialize the Buttplug library to set up the client for device communication
+        await Buttplug.buttplugInit();
       } catch (error) {
-          console.error("Failed to initialize Buttplug:", error);
-          return;
+        console.error("Failed to initialize Buttplug:", error);
+        return;
       }
 
-    const client = new Buttplug.ButtplugClient("vibe sequencer");
-    client.on("deviceadded", () => {
+      const client = new Buttplug.ButtplugClient("vibe sequencer");
+      client.on("deviceadded", () => {
+        setDevices(client.Devices);
+        setDeviceIndex(localStorage.deviceIndex, client.Devices);
+      });
+
+      await client.connect(new Buttplug.ButtplugWebsocketConnectorOptions());
+
       setDevices(client.Devices);
       setDeviceIndex(localStorage.deviceIndex, client.Devices);
-    });
 
-    await client.connect(new Buttplug.ButtplugWebsocketConnectorOptions());
+      client.startScanning();
 
-    setDevices(client.Devices);
-    setDeviceIndex(localStorage.deviceIndex, client.Devices);
+      setConnecting(false);
+    }
 
-    client.startScanning();
-
-    setConnecting(false);
+    init();
   }, []);
 
 
