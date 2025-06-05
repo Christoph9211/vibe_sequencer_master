@@ -127,6 +127,34 @@ function generateLifeLikePattern(rows, cols) {
 }
 
 /**
+ * Generates a life-like movement pattern that respects actuator limits.
+ * Consecutive values change by at most 1 to avoid sudden jumps.
+ * A slowly moving target value is followed to create smoother motion.
+ * @param {number} rows - Number of rows for the pattern.
+ * @param {number} cols - Number of columns for the pattern.
+ * @returns {number[]} - A 1D array representing the movement pattern.
+ */
+function generateSmoothLifePattern(rows, cols) {
+  const pattern = [];
+  let current = Math.floor(Math.random() * rows);
+  let target = Math.floor(Math.random() * rows);
+  let hold = Math.floor(Math.random() * 4) + 1;
+  pattern.push(current);
+  for (let i = 1; i < cols; i++) {
+    if (current === target && hold > 0) {
+      hold -= 1;
+    } else if (current === target) {
+      target = Math.floor(Math.random() * rows);
+      hold = Math.floor(Math.random() * 4) + 1;
+    }
+    if (current < target) current += 1;
+    else if (current > target) current -= 1;
+    pattern.push(current);
+  }
+  return pattern;
+}
+
+/**
  * Returns a random index into an array, with the probability of
  * choosing each index determined by the corresponding weight.
  * @param {number[]} weights - The weights for each index.
@@ -454,6 +482,9 @@ function Sequencer({
       case 'life-like':
         newSequence = generateLifeLikePattern(rows, columns);
         break;
+      case 'smooth-life':
+        newSequence = generateSmoothLifePattern(rows, columns);
+        break;
       case 'organic-motion':
         newSequence = generateOrganicMotion(rows, columns);
         break;
@@ -541,6 +572,7 @@ function Sequencer({
           <option value="perlin">Perlin Noise</option>
           <option value="brownian">Brownian Motion</option>
           <option value="life-like">Life-like</option>
+          <option value="smooth-life">Smooth Life-like</option>
           <option value="organic-motion">Organic Motion</option>
           <option value="auto">Auto</option>
         </select>
