@@ -138,17 +138,11 @@ function generateSmoothLifePattern(rows, cols) {
   const pattern = [];
   let current = Math.floor(Math.random() * rows);
   let target = Math.floor(Math.random() * rows);
-  let hold = Math.floor(Math.random() * 4) + 1;
   pattern.push(current);
   for (let i = 1; i < cols; i++) {
-    if (current === target && hold > 0) {
-      hold -= 1;
-    } else if (current === target) {
-      target = Math.floor(Math.random() * rows);
-      hold = Math.floor(Math.random() * 4) + 1;
-    }
     if (current < target) current += 1;
     else if (current > target) current -= 1;
+    else target = Math.floor(Math.random() * rows);
     pattern.push(current);
   }
   return pattern;
