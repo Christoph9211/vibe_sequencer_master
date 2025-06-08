@@ -6,6 +6,7 @@ import "@spectrum-web-components/theme/theme-dark.js";
 import "@spectrum-web-components/theme/scale-medium.js";
 import "@spectrum-web-components/slider/sp-slider.js";
 import "./index.css";
+import LLMMovementController from "./LLMMovementController.js";
 
 // Utility function to create an array with values from 0 to n-1
 function range(n) {
@@ -401,6 +402,12 @@ function generateOrganicMotion(rows, cols) {
   return pattern;
 }
 
+async function generateLLMPattern(description, rows, cols) {
+  const controller = new LLMMovementController();
+  const commands = await controller.generateMovementSequence(description, cols * 100);
+  return commands.map(v => Math.floor(v * (rows - 1)));
+}
+
 // Cell component that represents an individual grid cell in the sequencer
 function Cell({ select, selected }) {
   return (
@@ -445,7 +452,8 @@ function Sequencer({
   // Effect to generate initial sequence based on selected pattern mode
   useEffect(() => {
     let newSequence;
-    switch (patternMode) {
+    const generate = async () => {
+      switch (patternMode) {
       case 'random':
         newSequence = generateRandomPattern(rows, columns);
         break;
@@ -482,6 +490,9 @@ function Sequencer({
       case 'organic-motion':
         newSequence = generateOrganicMotion(rows, columns);
         break;
+      case 'llm':
+        newSequence = await generateLLMPattern('Create a vibration pattern', rows, columns);
+        break;
       case 'auto':
         newSequence = range(columns).map(i =>
           Math.floor(Math.sin(i * 0.5) * (rows - 1) + Math.random() * 2)
@@ -495,12 +506,13 @@ function Sequencer({
         } else if (newSequence.length > columns) {
           newSequence = newSequence.slice(0, columns);
         }
-    }
-    // Update the sequence state
-    setSequence({
-      ...sequence,
-      values: newSequence
-    });
+      }
+      setSequence({
+        ...sequence,
+        values: newSequence
+      });
+    };
+    generate();
   }, [patternMode, rows, columns]);
 
   // Callback to set a value in the sequence at a specific index
@@ -568,6 +580,7 @@ function Sequencer({
           <option value="life-like">Life-like</option>
           <option value="smooth-life">Smooth Life-like</option>
           <option value="organic-motion">Organic Motion</option>
+          <option value="llm">LLM Generated</option>
           <option value="auto">Auto</option>
         </select>
         <div className="grid-controls">
